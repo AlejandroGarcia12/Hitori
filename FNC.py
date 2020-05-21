@@ -71,7 +71,7 @@ def Tseitin(A, letrasProposicionalesA):
             A=A[1:]
             if len(A)>0:
                 s=A[0]
-                assert (s!="(")
+                #assert (s!="(")
         elif s==")":
             w=pila[-1]
             u=pila[-2]
@@ -83,7 +83,7 @@ def Tseitin(A, letrasProposicionalesA):
             l.append(atomo+"="+"("+v+u+w+")")
             s=atomo
         else:
-            assert (s!="(")
+            #assert (s!="(")
             pila.append(s)
             A=A[1:]
             if len(A)>0:
@@ -105,7 +105,7 @@ def Tseitin(A, letrasProposicionalesA):
 # Input: C (cadena) una clausula
 # Output: L (lista), lista de literales
 # Se asume que cada literal es un solo caracter
-def Clausula(C):
+def Clausulaan(C):
     l = []
     while len(C) > 0:
         s = C[0]
@@ -120,6 +120,19 @@ def Clausula(C):
             C = C[1:]
     return l
 
+def Clausula(C):
+    l = []
+    while len(C) > 0:
+    	s = C[0]
+    	if s == "-":
+            literal = s+C[1]
+            l.append(literal)
+            C = C[3:]
+    	else:
+    		l.append(s)
+    		C = C[2:]
+    		
+    return l
 # Algoritmo para obtencion de forma clausal
 # Input: A (cadena) en notacion inorder en FNC
 # Output: L (lista), lista de listas de literales

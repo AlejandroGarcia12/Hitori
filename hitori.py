@@ -183,61 +183,55 @@ def empezar():
         label_3.grid(row = i , column = 2)
         label_4.grid(row = i , column = 3)
     regla0= Crear_regla0(dic)
-    regla00= Crear_regla00()
+    regla00= Crear_regla00(dic)
     regla1= Crear_regla1(dic)
     regla2= Crear_regla2()
-    regla3= Crear_regla3()
-    regla = regla0+regla1+regla2+regla3+"Y"+"Y"+"Y"
-    regla = regla00
+    regla = regla00+regla0+regla1+regla2+"Y"+"Y"+"Y"
+    #regla = regla0
     #print("regla: ", regla)
-    print("Resolviendo")
+    print("Resolviendo: ")
+    print("string to tree")
     regla = Tableaux.StringtoTree(regla)
-    print(".")
-    regla2 = Tableaux.Inorder1(regla)
+    print("Inorder")
+    #regla2 = Tableaux.Inorder1(regla)
     regla = Tableaux.Inorder(regla)
-    print(regla)
-    print(".")
+    #print(regla)
+    print("Tseitin")
     regla = FNC.Tseitin(regla,letrasProposicionales)
-    print("tseitin: ",regla)
-    print(".")
+    #print("tseitin: ",regla)
+    print("Forma clausal")
     regla = FNC.formaClausal(regla)
-    print(".")
+    print("DPLL")
     k={}
-    print(".")
     s,newdic = Algoritmo_DPLL.DPLL(regla, k)
     print("listo!")
     print("s:",s)
     #print("diccionario: ",newdic)
     auxdic={}
+    cont=0
     for key in newdic.keys():
         if key in letrasProposicionales and newdic[key]==1:
             temp=decodifica3(ord(key)-256, nf, nc, no)
             auxdic[key]=newdic[key]
-            print("(f,c,num): ", temp)
+            print("{0},(f,c,num): ".format(cont), temp)
+            cont+=1
     #print("regla algoritmo: ",auxdic) 
     print("vizualizando")
     visualizar(auxdic)
        
 
-def Crear_regla00():
+def Crear_regla00(dic):
     inicial_regla=True
-    for c in range(nc-3):
-        for f in range(nf-2):
-            for o in range(no-8):
-                objetos=[x for x in range(10) if x!=o]
-                inicial_clau=True
-                for oi in objetos:
-                    if inicial_clau:
-                        clau=chr(codifica3(f, c, oi, nf, nc, no)+256)
-                        inicial_clau=False
+    for c in range(nc):
+        for f in range(nf):
+            for o in range(1,10):
+                if chr(codifica3(f, c, o, nf, nc, no)+256) not in dic.keys():
+                    if inicial_regla:
+                        clau=chr(codifica3(f, c, o, nf, nc, no)+256)+"-"
+                        inicial_regla=False
                     else:
-                        clau+=chr(codifica3(f, c, oi, nf, nc, no)+256)+"O"  
-                if inicial_regla:
-                    regla=chr(codifica3(f, c, o, nf, nc, no)+256)+clau+"-"+"="
-                    inicial_regla=False
-                else:
-                    regla+=chr(codifica3(f, c, o, nf, nc, no)+256)+clau+"-"+"="+"Y"
-    return regla
+                        clau+=chr(codifica3(f, c, o, nf, nc, no)+256)+"-"+"Y"  
+    return clau
 
 def Crear_regla0an(dic):
     inicial_regla=True
@@ -271,38 +265,6 @@ def Crear_regla0(dic):
 #REGLA 1
 #Eliminar casilla si en su fila o columna se encuentra un número repetido
 
-def Crear_regla1an(dic):
-    fila=[x for x in range(nf)]
-    colum=[x for x in range(nc)]
-    inicial_regla=True
-    
-    for f in fila:
-        for c in colum:
-            for o in range(1,10):
-                letra=chr(codifica3(f, c, o, nf, nc, no)+256)
-                if letra in dic.keys():
-                    inicial_clau=True
-                    otrasF=[x for x in fila if x!=f]
-                    otrasC=[x for x in colum if x!=c]
-                    for j in len(otrasC)-1:
-                        if inicial_clau:
-                            clau=chr(codifica3(f, otrasC[j], o, nf, nc, no)+256)+chr(codifica3(f, otrasC[j+1], o, nf, nc, no)+256)+"O"
-                            inicial_clau=False
-                        else:
-                            clau+=chr(codifica3(f, j, o, nf, nc, no)+256)+"-"+"Y"
-                    
-                    for k in otrasF:
-                        if inicial_clau:
-                            clau=chr(codifica3(k, c, o, nf, nc, no)+256)+"-"
-                            inicial_clau=False
-                        else:
-                            clau+=chr(codifica3(k, c, o, nf, nc, no)+256)+"-"+"Y"
-                    if inicial_regla:
-                        regla=clau+chr(codifica3(f, c, o, nf, nc, no)+256)+"="
-                        inicial_regla=False
-                    else:
-                        regla+=clau+chr(codifica3(f, c, o, nf, nc, no)+256)+"="+"Y"
-    return regla
 
 def Crear_regla1(dic):
     fila=[x for x in range(nf)]
@@ -368,141 +330,6 @@ def Crear_regla2():
                 regla+=clau+chr(codifica3(f, c, 0, nf, nc, no)+256)+">"+"Y"
     return regla
 
-
-
-#Regla 3
-#Las que no estan tapadas queden conectadas ortogonalmente
-def Crear_regla3():
-    #esquinas
-    esq=""
-    literal1 = codifica3(0,1,0,nf,nc,no)
-    literal1=chr(literal1+256)
-    literal2 = codifica3(1,0,0,nf,nc,no)
-    literal2=chr(literal2+256)
-    esq=literal1+literal2+"Y"+"-"
-    literal1 = codifica3(0,2,0,nf,nc,no)
-    literal1=chr(literal1+256)
-    literal2 = codifica3(1,3,0,nf,nc,no)
-    literal2=chr(literal2+256)
-    esq=literal1+literal2+"Y"+"-"+esq+"Y"
-    literal1 = codifica3(2,0,0,nf,nc,no)
-    literal1=chr(literal1+256)
-    literal2 = codifica3(3,1,0,nf,nc,no)
-    literal2=chr(literal2+256)
-    esq=literal1+literal2+"Y"+"-"+esq+"Y"
-    literal1 = codifica3(2,3,0,nf,nc,no)
-    literal1=chr(literal1+256)
-    literal2 = codifica3(3,2,0,nf,nc,no)
-    literal2=chr(literal2+256)
-    esq=literal1+literal2+"Y"+"-"+esq+"Y"
-    #Diagonales
-    d1=""
-    d2=""
-    d3=""
-    d4=""
-    d5=""
-    d6=""
-    iniciald1=True
-    iniciald2=True
-    iniciald3=True
-    for j in range(3):
-        for i in range(3):
-            literal1=codifica3(j,i,0,nf,nc,no)
-            literal1=chr(literal1+256)
-            literal2 = codifica3(j+1,i+1,0,nf,nc,no)
-            literal2=chr(literal2+256)
-            if j==0:
-                if iniciald1:
-                    d1=literal1+literal2+"Y"
-                    iniciald1=False
-                else:
-                    d1=literal1+literal2+"Y"+d1+"O"
-            elif j==1:
-                if iniciald2:
-                    d2=literal1+literal2+"Y"
-                    iniciald2=False
-                else:
-                    d2=literal1+literal2+"Y"+d1+"O"
-            elif j==2:
-                if iniciald3:
-                    d3=literal1+literal2+"Y"
-                    iniciald3=False
-                else:
-                    d3=literal1+literal2+"Y"+d1+"O"
-            literal1=codifica3(j+1,i,0,nf,nc,no)
-            literal1=chr(literal1+256)
-            literal2 = codifica3(j,i+1,0,nf,nc,no)
-            literal2=chr(literal2+256)
-            if j==0:
-                if iniciald1:
-                    d1=literal1+literal2+"Y"
-                    iniciald1=False
-                else:
-                    d1=literal1+literal2+"Y"+d1+"O"
-            elif j==1:
-                if iniciald2:
-                    d2=literal1+literal2+"Y"
-                    iniciald2=False
-                else:
-                    d2=literal1+literal2+"Y"+d1+"O"
-            elif j==2:
-                if iniciald3:
-                    d3=literal1+literal2+"Y"
-                    iniciald3=False
-                else:
-                    d3=literal1+literal2+"Y"+d1+"O"
-    iniciald1=True
-    iniciald2=True
-    iniciald3=True
-    for j in range(3):
-        for i in range(3):
-            literal1=codifica3(i,j,0,nf,nc,no)
-            literal1=chr(literal1+256)
-            literal2 = codifica3(i+1,j+1,0,nf,nc,no)
-            literal2=chr(literal2+256)
-            if j==0:
-                if iniciald1:
-                    d4=literal1+literal2+"Y"
-                    iniciald1=False
-                else:
-                    d4=literal1+literal2+"Y"+d1+"O"
-            elif j==1:
-                if iniciald2:
-                    d5=literal1+literal2+"Y"
-                    iniciald2=False
-                else:
-                    d5=literal1+literal2+"Y"+d1+"O"
-            elif j==2:
-                if iniciald3:
-                    d6=literal1+literal2+"Y"
-                    iniciald3=False
-                else:
-                    d6=literal1+literal2+"Y"+d1+"O"
-            literal1=codifica3(i,j+1,0,nf,nc,no)
-            literal1=chr(literal1+256)
-            literal2 = codifica3(i+1,j,0,nf,nc,no)
-            literal2=chr(literal2+256)
-            if j==0:
-                if iniciald1:
-                    d4=literal1+literal2+"Y"
-                    iniciald1=False
-                else:
-                    d4=literal1+literal2+"Y"+d1+"O"
-            elif j==1:
-                if iniciald2:
-                    d5=literal1+literal2+"Y"
-                    iniciald2=False
-                else:
-                    d5=literal1+literal2+"Y"+d1+"O"
-            elif j==2:
-                if iniciald3:
-                    d6=literal1+literal2+"Y"
-                    iniciald3=False
-                else:
-                    d6=literal1+literal2+"Y"+d1+"O"
-    d=d6+"-"+d5+"-"+d4+"-"+"O"+"O"+d3+"-"+d2+"-"+d1+"-"+"O"+"O"+"Y"
-    regla=d+esq+"Y"
-    return regla
 
 
 #Barra de menú
